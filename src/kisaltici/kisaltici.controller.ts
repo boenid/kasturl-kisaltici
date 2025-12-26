@@ -6,18 +6,18 @@ import { KisaUrlOlusturDto } from './kisa-url-olustur.dto';
 export class KisalticiController {
   constructor(private readonly service: KisalticiService) {}
 
-  // Kısaltma isteği (POST /shorten)
   @Post('shorten')
   async shorten(@Body() kisaUrlOlusturDto: KisaUrlOlusturDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const code = await this.service.shorten(kisaUrlOlusturDto.url);
     return { shortCode: code };
   }
 
-  // Yönlendirme isteği (GET /:code)
   @Get(':code')
   @Redirect()
   async redirect(@Param('code') code: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
     const url = await this.service.retrieve(code);
-    return { url }; // NestJS bunu otomatik 302 Yönlendirmesine çevirir
+    return { url };
   }
 }

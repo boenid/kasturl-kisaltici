@@ -5,48 +5,43 @@ import { Url } from './url.entity';
 
 @Injectable()
 export class KisalticiService {
-	private readonly karakter_kumesi = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  private readonly alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  private readonly base = this.alphabet.length;
 
-	constructor(
-		@InjectRepository(Url)
-		private urlRepo: Repository<Url>,
-	) {}
+  constructor(
+    @InjectRepository(Url)
+    private urlRepo: Repository<Url>,
+  ) {}
 
-	kodla(sayi: number): string {
-		if (sayi === 0) return this.karakter_kumesi[0];
+  encode(num: number): string {
+    if (num === 0) return this.alphabet[0];
+    let encoded = '';
+    while (num > 0) {
+      const remainder = num % this.base;
+      encoded = this.alphabet[remainder] + encoded;
+      num = Math.floor(num / this.base);
+    }
+    return encoded;
+  }
 
-		let kodlanmis = '';
+  // BURAYA DİKKAT: Adı 'shorten'
+  async shorten(originalUrl: string): Promise<string> {
+    const newUrl = this.urlRepo.create({ originalUrl });
+    const savedUrl = await this.urlRepo.save(newUrl);
 
-		while (sayi > 0) {
-			const kalan = sayi % 62;
+    const code = this.encode(savedUrl.id);
 
-			kodlanmis = this.karakter_kumesi[kalan] + kodlanmis;
+    savedUrl.shortCode = code;
+    await this.urlRepo.save(savedUrl);
 
-			sayi = Math.floor(sayi / 62);
-		}
+    return code;
+  }
 
-		return kodlanmis;
-	}
-
-	async kisalt(asilUrl: string): Promise<string> {
-		const yeniUrl = this.urlRepo.create({ asilUrl });
-		const kayitliUrl = await this.urlRepo.save(yeniUrl);
-
-		const kod = this.kodla(kayitliUrl.id);
-
-		kayitliUrl.kisaKod = kod;
-		await this.urlRepo.save(kayitliUrl);
-
-		return kod;
-	}
-
-	async retrieve(kod: string): Promise<string> {
-		const url = await this.urlRepo.findOneBy({ kisaKod: kod });
-
-		if (!url) {
-			throw new NotFoundException('böyle bir kısa kod yok');
-		}
-
-		return url.asilUrl;
-	}
+  async retrieve(code: string): Promise<string> {
+    const url = await this.urlRepo.findOneBy({ shortCode: code });
+    if (!url) {
+      throw new NotFoundException('Bu kısa kod sistemde bulunamadı!');
+    }
+    return url.originalUrl;
+  }
 }
