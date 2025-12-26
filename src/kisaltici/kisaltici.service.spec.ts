@@ -15,7 +15,7 @@ describe('KisalticiService', () => {
       }),
   
       findOneBy: jest.fn().mockImplementation((kriter) => {
-        // Kriterin içindeki değere bakalım
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         const kod = kriter.shortCode || kriter.kisaKod;
   
         if (kod === 'g8') {
