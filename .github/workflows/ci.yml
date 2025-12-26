@@ -14,30 +14,29 @@ jobs:
     # 1. Adım: Kodları GitHub'dan çek
     - uses: actions/checkout@v3
 
-    # 2. Adım: Node.js ortamını kur (Bizim bilgisayardaki gibi)
+    # 2. Adım: Node.js ortamını kur
     - name: Node.js Kurulumu
       uses: actions/setup-node@v3
       with:
         node-version: '20'
         cache: 'npm'
 
-    # 3. Adım: Paketleri yükle (node_modules)
+    # 3. Adım: Paketleri yükle
     - name: Bağımlılıkları Yükle
       run: npm ci
 
-    # 4. Adım: Kodda yazım hatası var mı? (Lint)
+    # 4. Adım: Kod Kontrolü (Lint)
     - name: Kod Kontrolü (Lint)
       run: npm run lint
 
-    # 5. Adım: Testleri Çalıştır (Bizim yazdığımız testler)
+    # 5. Adım: Testleri Çalıştır
     - name: Testleri Koş (Unit Tests)
       run: npm run test
 
-      # ... (önceki adımlar: checkout, node, install, lint, test)
-      # 6. Adım: Versiyonlama ve Yayınlama (Sadece main branch'te çalışır)
+    # 6. Adım: Versiyonlama ve Yayınlama (Sadece main branch'te çalışır)
     - name: Otomatik Versiyonlama (Semantic Release)
-    if: github.ref == 'refs/heads/main'
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    run: npx semantic-release
+      if: github.ref == 'refs/heads/main'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: npx semantic-release
