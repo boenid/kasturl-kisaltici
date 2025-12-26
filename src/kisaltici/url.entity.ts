@@ -1,16 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Url {
-	@PrimaryGeneratedColumn()
-	id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-	@Column()
-	asilUrl: string;
+  @Column()
+  originalUrl: string;
 
-	@Column({ nullable: true})
-	kisaKod: string;
-
-	@CreateDateColumn()
-	createdAt: Date;
+  @Column({ nullable: true })
+  shortCode: string;
 }

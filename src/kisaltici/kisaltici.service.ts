@@ -32,6 +32,10 @@ export class KisalticiService {
 
   // BURAYA DİKKAT: Adı 'shorten'
   async shorten(originalUrl: string): Promise<string> {
+	if (!originalUrl.startsWith('http://') && !originalUrl.startsWith('https://')) {
+	        originalUrl = 'https://' + originalUrl;
+	    }
+	    
     const newUrl = this.urlRepo.create({ originalUrl });
     const savedUrl = await this.urlRepo.save(newUrl);
 
