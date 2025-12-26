@@ -6,7 +6,8 @@ import { Url } from './url.entity';
 describe('KisalticiService', () => {
   let service: KisalticiService;
 
-  const mockUrlRepository = {
+  const mockUrlRepository = {x
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     create: jest.fn().mockImplementation((dto) => dto),
   	save: jest.fn().mockImplementation((dto) => {
   		return Promise.resolve({ id: 1000, ...dto});

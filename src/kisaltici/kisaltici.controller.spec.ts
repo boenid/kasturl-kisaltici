@@ -34,7 +34,8 @@ describe('KisalticiController', () => {
     it('servisi çağırıp kısa kod döndürmeli', async () => {
       const dto = { url: 'https://kastamonu.edu.tr' };
       const result = await controller.shorten(dto);
-      
+
+     // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.shorten).toHaveBeenCalledWith(dto.url);
       expect(result).toEqual({ shortCode: 'G8' });
     });
@@ -44,6 +45,7 @@ describe('KisalticiController', () => {
     it('servisten gelen URL e yönlendirme yapmalı', async () => {
       const result = await controller.redirect('G8');
       
+   // eslint-disable-next-line @typescript-eslint/unbound-method   
       expect(service.retrieve).toHaveBeenCalledWith('G8');
       expect(result).toEqual({ url: 'https://kastamonu.edu.tr' });
     });
