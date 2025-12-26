@@ -15,16 +15,18 @@ describe('KisalticiService', () => {
       }),
   
       findOneBy: jest.fn().mockImplementation((kriter) => {
+        // BURAYI DİKKATLİCE KOPYALA
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-        const kod = kriter.shortCode || kriter.kisaKod;
+        const arananKod = kriter.shortCode || kriter.kisaKod || kriter.code;
   
-        if (kod === 'g8') {
+        // Hem 'g8' (beklenen) hem de testten gelebilecek diğer ihtimalleri kapsayalım
+        if (arananKod === 'g8') {
           return Promise.resolve({
             id: 1000,
             shortCode: 'g8',
-            kisaKod: 'g8',
+            kisaKod: 'g8', // Garanti olsun
             originalUrl: 'https://google.com',
-            asilUrl: 'https://google.com'
+            asilUrl: 'https://google.com' // Garanti olsun
           });
         }
         return Promise.resolve(null);

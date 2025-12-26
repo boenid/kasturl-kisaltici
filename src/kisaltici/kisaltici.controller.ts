@@ -9,7 +9,7 @@ export class KisalticiController {
   // Kısaltma isteği (POST /shorten)
   @Post('shorten')
   async shorten(@Body() kisaUrlOlusturDto: KisaUrlOlusturDto) {
-    const code = await this.service.kisalt(kisaUrlOlusturDto.url);
+    const code = await this.service.shorten(kisaUrlOlusturDto.url);
     return { shortCode: code };
   }
 
