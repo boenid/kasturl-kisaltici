@@ -6,19 +6,30 @@ import { Url } from './url.entity';
 describe('KisalticiService', () => {
   let service: KisalticiService;
 
-  const mockUrlRepository = {x
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    create: jest.fn().mockImplementation((dto) => dto),
-  	save: jest.fn().mockImplementation((dto) => {
-  		return Promise.resolve({ id: 1000, ...dto});
-  	}),
-  	findOneBy: jest.fn().mockImplementation(({ kisaKod }) => {
-  		if (kisaKod === 'G8') {
-  			return Promise.resolve({ id: 1000, kisaKod: 'G8', asilUrl: 'https://kastamonu.edu.tr/' });
-  		}
-  		return Promise.resolve(null);
-  	}),
-  };
+  const mockUrlRepository = {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      create: jest.fn().mockImplementation((dto) => dto),
+  
+      save: jest.fn().mockImplementation((dto) => {
+        return Promise.resolve({ id: 1000, ...dto });
+      }),
+  
+      findOneBy: jest.fn().mockImplementation((kriter) => {
+        // Kriterin içindeki değere bakalım
+        const kod = kriter.shortCode || kriter.kisaKod;
+  
+        if (kod === 'g8') {
+          return Promise.resolve({
+            id: 1000,
+            shortCode: 'g8',
+            kisaKod: 'g8',
+            originalUrl: 'https://google.com',
+            asilUrl: 'https://google.com'
+          });
+        }
+        return Promise.resolve(null);
+      }),
+    };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
