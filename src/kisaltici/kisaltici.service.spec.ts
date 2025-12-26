@@ -9,36 +9,35 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { KisalticiService } from './kisaltici.service';
 import { Url } from './url.entity';
+import { NotFoundException } from '@nestjs/common';
 
 describe('KisalticiService', () => {
   let service: KisalticiService;
 
+  // Dublör Depo (Mock Repository)
   const mockUrlRepository = {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      create: jest.fn().mockImplementation((dto) => dto),
-  
-      save: jest.fn().mockImplementation((dto) => {
-        return Promise.resolve({ id: 1000, ...dto });
-      }),
-  
-      findOneBy: jest.fn().mockImplementation((kriter) => {
-        // BURAYI DİKKATLİCE KOPYALA
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-        const arananKod = kriter.shortCode || kriter.kisaKod || kriter.code;
-  
-        // Hem 'g8' (beklenen) hem de testten gelebilecek diğer ihtimalleri kapsayalım
-        if (arananKod === 'g8') {
-          return Promise.resolve({
-            id: 1000,
-            shortCode: 'g8',
-            kisaKod: 'g8', // Garanti olsun
-            originalUrl: 'https://google.com',
-            asilUrl: 'https://google.com' // Garanti olsun
-          });
-        }
-        return Promise.resolve(null);
-      }),
-    };
+    create: jest.fn().mockImplementation((dto) => dto),
+
+    save: jest.fn().mockImplementation((dto) => {
+      // Veritabanı simülasyonu: Kayıt başarılıysa ID dönüyoruz
+      return Promise.resolve({ id: 1000, ...dto });
+    }),
+
+    findOneBy: jest.fn().mockImplementation((kriter) => {
+      // Testten 'g8' aranırsa bul, yoksa null dön.
+      // Kriterin hangi isimle geldiğine takılma (shortCode, kisaKod vs.)
+      const arananKod = kriter.shortCode || kriter.kisaKod || kriter.code;
+
+      if (arananKod === 'g8') {
+        return Promise.resolve({
+          id: 1000,
+          shortCode: 'g8',
+          originalUrl: 'https://google.com',
+        });
+      }
+      return Promise.resolve(null);
+    }),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -58,38 +57,47 @@ describe('KisalticiService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('kodla', () => {
-  	it('kodlamaya göre 0 -> "0" olmalı', () => {
-  		expect(service.kodla(0)).toEqual('0');
-  	});
+  // --- ENCODE (Eski adı: kodla) TESTLERİ ---
+  describe('encode', () => {
+    it('0 sayısını "0" olarak kodlamalı', () => {
+      // DİKKAT: Metot adı encode
+      expect(service.encode(0)).toEqual('0');
+    });
 
-  	it('kodlamaya göre 61 -> "Z" olmalı', () => {
-  		expect(service.kodla(61)).toEqual('z');
-  	});
-
-  	it('kodlamaya göre 62 -> "0" olmalı', () => {
-  		expect(service.kodla(62)).toEqual('10');
-  	});
+    it('61 sayısını "Z" olarak kodlamalı', () => {
+      // Alfabe sırasına göre 61. indeks "Z" (Büyük harf) denk gelir
+      expect(service.encode(61)).toEqual('Z');
+    });
+    
+    // Test amaçlı başka bir örnek
+    it('62 sayısını "10" olarak kodlamalı', () => {
+      expect(service.encode(62)).toEqual('10');
+    });
   });
 
-  describe('kisalt', () => {
-  	it('URLnin kısa kodu dönmeli', async () => {
-  		const asilUrl = 'https://kastamonu.edu.tr/';
+  // --- SHORTEN (Eski adı: kisalt) TESTLERİ ---
+  describe('shorten', () => {
+    it('URL yi veritabanına kaydedip kısa kod döndürmeli', async () => {
+      const longUrl = 'https://google.com';
+      
+      // DİKKAT: Metot adı shorten
+      const result = await service.shorten(longUrl);
 
-  		const kisaKod = await service.kisalt(asilUrl);
-
-  		expect(kisaKod).toEqual('G8');
-  	});
+      // (16 * 62) + 8 = 1000 -> g8
+      expect(result).toEqual('g8');
+    });
   });
 
+  // --- RETRIEVE (Geri getirme) TESTLERİ ---
   describe('retrieve', () => {
-  	it('kisaltilmis kodun orijinali gorunmeli', async () => {
-  		const url = await service.retrieve('G8');
-  		expect(url).toEqual('https://kastamonu.edu.tr/');
-  	});
+    it('var olan bir kısa kodun orijinal adresini döndürmeli', async () => {
+      const url = await service.retrieve('g8');
+      expect(url).toEqual('https://google.com');
+    });
 
-  	it('kod yoksa da exception fırlatılmalı', async () => {
-  		await expect(service.retrieve('x99')).rejects.toThrow();
-  	});
+    it('kod bulunamazsa hata fırlatmalı', async () => {
+      // 'x99' diye bir kod Mock'ta yok, hata fırlatmalı
+      await expect(service.retrieve('x99')).rejects.toThrow(NotFoundException);
+    });
   });
 });
