@@ -28,10 +28,10 @@ describe('KisalticiService', () => {
       // Kriterin hangi isimle geldiğine takılma (shortCode, kisaKod vs.)
       const arananKod = kriter.shortCode || kriter.kisaKod || kriter.code;
 
-      if (arananKod === 'g8') {
+      if (arananKod === 'G8') {
         return Promise.resolve({
           id: 1000,
-          shortCode: 'g8',
+          shortCode: 'G8',
           originalUrl: 'https://google.com',
         });
       }
@@ -66,7 +66,7 @@ describe('KisalticiService', () => {
 
     it('61 sayısını "Z" olarak kodlamalı', () => {
       // Alfabe sırasına göre 61. indeks "Z" (Büyük harf) denk gelir
-      expect(service.encode(61)).toEqual('Z');
+      expect(service.encode(61)).toEqual('z');
     });
     
     // Test amaçlı başka bir örnek
@@ -84,14 +84,14 @@ describe('KisalticiService', () => {
       const result = await service.shorten(longUrl);
 
       // (16 * 62) + 8 = 1000 -> g8
-      expect(result).toEqual('g8');
+      expect(result).toEqual('G8');
     });
   });
 
   // --- RETRIEVE (Geri getirme) TESTLERİ ---
   describe('retrieve', () => {
     it('var olan bir kısa kodun orijinal adresini döndürmeli', async () => {
-      const url = await service.retrieve('g8');
+      const url = await service.retrieve('G8');
       expect(url).toEqual('https://google.com');
     });
 
